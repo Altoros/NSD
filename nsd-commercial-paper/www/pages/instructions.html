@@ -1,0 +1,604 @@
+
+
+<div class="progress" ng-show="ctl.invokeInProgress">
+    <div class="indeterminate"></div>
+</div>
+
+
+<div>
+  <div class="row">
+    <div class="col s12">
+      <div>
+        <!-- Modal Trigger -->
+        <button class="btn btn-primary" type="button" ng-click="ctl.newInstructionTransfer('transferer')"
+                href="#transferInstruction" modal role-show="issuer, investor"><span translate>TRANSFER_INSTRUCTION_LABEL</span></button>
+
+        <button class="btn btn-primary" type="button" ng-click="ctl.newInstructionTransfer('receiver')"
+                href="#transferInstruction" modal role-show="issuer, investor"><span translate>RECEIVE_INSTRUCTION_LABEL</span></button>
+
+        <button class="btn btn-primary" type="button" ng-click="formRedemption.$setPristine(); ctl.newRedemption()"
+                href="#redemption" modal role-show="nsd"><span translate>CREATE_REDEMPTION_INSTRUCTION_LABEL</span></button>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div id="tab-balances" class="col s12">
+      <table class="table-bordered highlight responsive-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th translate>&nbsp;</th>
+                <th translate>REQUISITIES</th>
+                <th translate>SECURITY_LABEL</th>
+                <th translate>QUANTITY_LABEL</th>
+                <th translate>REFERENCE_LABEL</th>
+                <th translate>MEMBER_INSTRUCTION_ID_LABEL</th>
+                <th translate>INSTRUCTION_DATE_LABEL</th>
+                <th translate>TRADE_DATE_LABEL</th>
+                <th translate>STATUS_LABEL</th>
+                <th translate>REASON_LABEL</th>
+
+                <!-- DVP -->
+                <th translate>PAYMENT_LABEL</th>
+                <th translate>SECURITY_PAY_LABEL</th>
+                <th translate>DVP_EXTRA</th>
+            </tr>
+        </thead>
+        <tbody ng-repeat="o in ctl.list|orderBy:['-instructionDate', '-reference']" ng-click="ctl.showHistory(o)">
+
+            <tr class="odd-{{::$index % 2}}" ng-if="::ctl.isAdmin() || ctl.isInitiator(o)">
+                <!-- initiator -->
+                <th rowspan="2" translate>{{:: ctl.getInstructionID(o, false) }}</th>
+                <td translate>TRANSFERER_LABEL</td>
+                <td class="nowrap">
+                    {{::o.deponentFrom}} / {{::o.transferer.account}} / {{::o.transferer.division}}
+                </td>
+                <td rowspan="2">{{::o.security}}</td>
+                <td rowspan="2">{{::o.quantity}}</td>
+                <td rowspan="2">{{::o.reference}}</td>
+                <td rowspan="2">{{::o.initiator=='transferer' ? o.memberInstructionIdFrom : o.memberInstructionIdTo}}</td>
+                <td rowspan="2" class="nowrap">{{::o.instructionDate|date}}</td>
+                <td rowspan="2" class="nowrap">{{::o.tradeDate|date}}</td>
+                <td rowspan="2" class="center btn-group-vertical">
+                    <div class="{{::ctl.getStatusClass(o.status)}}">{{::'STATUS_'+o.status|translate}}</div>
+
+                    <!-- specific for initiator/admin -->
+                    <input type="button" class="btn btn-small waves-effect waves-light red darken-2"
+                           value="CANCEL_LABEL" translate-attr="{value:'CANCEL_LABEL'}"
+                           ng-show="::o.status=='initiated'" role-hide="nsd"
+                           ng-click="$event.stopPropagation(); ctl.cancelInstruction(o);"/>
+
+                    <input type="button" class="btn btn-small waves-effect waves-light red darken-2"
+                           value="ROLLBACK_LABEL" translate-attr="{value:'ROLLBACK_LABEL'}"
+                           ng-show="::ctl.canRollback(o)" role-show="nsd"
+                           ng-click="$event.stopPropagation(); ctl.rollbackInstruction(o);"/>
+
+
+                    <!-- common stuff -->
+                    <a ng-show="::ctl.isInstructionXmlAvailable(o)"
+                       type="button" class="btn btn-small waves-effect waves-light darken-2"
+                       ng-click="$event.stopPropagation();"
+                       download="{{::ctl.getInstructionFilename(o, o.initiator)}}"
+                       href="{{::ctl.getInstructionXmlLink(o, o.initiator)}}"
+                       translate>DOWNLOAD_XML</a>
+
+
+                    <input type="button" class="btn btn-small waves-effect waves-light darken-2"
+                           value="UPLOAD_SIGNATURE" translate-attr="{value:'UPLOAD_SIGNATURE'}"
+                           ng-show="::ctl.canUploadSignature(o)" role-hide="nsd"
+                           ng-click="$event.stopPropagation(); ctl.uploadSignatureDialog(o);" />
+
+                    <a ng-show="::ctl.isSignAvailable(o, o.initiator)" role-show="nsd"
+                       type="button" class="btn btn-small waves-effect waves-light darken-2"
+                       ng-click="$event.stopPropagation(); ctl.markSignDownloaded(o, o.initiator)"
+                       download="{{::ctl.getSignFilename(o, o.initiator)}}"
+                       href="{{::ctl.getSignLink(o, o.initiator)}}"
+                       translate>DOWNLOAD_SIGNATURE</a>
+
+                </td>
+                <td rowspan="2" ng-if="::o.initiator=='transferer'">
+                  <span>{{::o.reasonFrom.description}}</span>
+                  <span ng-if="::o.reasonFrom.document">{{::o.reasonFrom.document}}/{{::o.reasonFrom.created}}</span>
+                </td>
+                <td rowspan="2" ng-if="::o.initiator=='receiver'">
+                  <span>{{::o.reasonTo.description}}</span>
+                  <span ng-if="::o.reasonTo.document">{{::o.reasonTo.document}}/{{::o.reasonTo.created}}</span>
+                </td>
+
+                <!-- DVP -->
+                <td rowspan="2" class="nowrap gray" ng-if=":: o.type!='dvp'" colspan="4"><i translate>FREE_OF_PAYMENT</i></td>
+                <td class="nowrap" ng-if=":: o.type=='dvp'">
+                    {{::o.transfererRequisites.account}} / {{::o.transfererRequisites.bic}}
+                </td>
+                <td rowspan="2" class="nowrap" ng-if=":: o.type=='dvp'">{{::o.paymentAmount}} {{::o.paymentCurrency}}</td>
+
+                <td rowspan="2" class="nowrap" ng-if=":: o.type=='dvp' && o.initiator=='receiver'">{{::o.additionalInformation.description}}</td>
+                <td rowspan="2" class="nowrap" ng-if=":: o.type=='dvp' && o.initiator=='transferer'">-</td>
+
+            </tr>
+            <tr class="odd-{{::$index % 2}}" ng-if="::ctl.isAdmin() || ctl.isInitiator(o)">
+                <td translate>RECEIVER_LABEL</td>
+                <td class="nowrap">
+                    {{::o.deponentTo}}   / {{::o.receiver.account}}   / {{::o.receiver.division}}
+                </td>
+                <td class="nowrap" ng-if=":: o.type=='dvp'">
+                    {{::o.receiverRequisites.account}}   / {{::o.receiverRequisites.bic}}
+                </td>
+            </tr>
+
+            <!-- opponent -->
+            <tr class="odd-{{::$index % 2}}" ng-if="::(o.status!='initiated' && o.status!='canceled') && (ctl.isAdmin() || !ctl.isInitiator(o))">
+                <!-- second member -->
+                <th rowspan="2" translate>{{:: ctl.getInstructionID(o, true) }}</th>
+                <td translate>TRANSFERER_LABEL</td>
+                <td class="nowrap">
+                    {{::o.deponentFrom}} / {{::o.transferer.account}} / {{::o.transferer.division}}
+                </td>
+                <td rowspan="2">{{::o.security}}</td>
+                <td rowspan="2">{{::o.quantity}}</td>
+                <td rowspan="2">{{::o.reference}}</td>
+                <td rowspan="2">{{::o.initiator!='transferer' ? o.memberInstructionIdFrom : o.memberInstructionIdTo}}</td>
+                <td rowspan="2" class="nowrap">{{::o.instructionDate|date}}</td>
+                <td rowspan="2" class="nowrap">{{::o.tradeDate|date}}</td>
+                <td rowspan="2" class="center btn-group-vertical">
+                    <div class="{{::ctl.getStatusClass(o.status)}}">{{::'STATUS_'+o.status|translate}}</div>
+
+                    <a ng-show="::ctl.isInstructionXmlAvailable(o)"
+                       type="button" class="btn btn-small waves-effect waves-light darken-2"
+                       ng-click="$event.stopPropagation();"
+                       download="{{::ctl.getInstructionFilename(o, ctl.oppositeSide(o.initiator))}}"
+                       href="{{::ctl.getInstructionXmlLink(o, ctl.oppositeSide(o.initiator))}}"
+                       translate>DOWNLOAD_XML</a>
+
+
+                    <input type="button" class="btn btn-small waves-effect waves-light darken-2"
+                           value="UPLOAD_SIGNATURE" translate-attr="{value:'UPLOAD_SIGNATURE'}"
+                           ng-show="::ctl.canUploadSignature(o)" role-hide="nsd"
+                           ng-click="$event.stopPropagation(); ctl.uploadSignatureDialog(o);" />
+
+
+                    <a ng-show="::ctl.isSignAvailable(o, ctl.oppositeSide(o.initiator))" role-show="nsd"
+                       type="button" class="btn btn-small waves-effect waves-light darken-2"
+                       ng-click="$event.stopPropagation(); ctl.markSignDownloaded(o, ctl.oppositeSide(o.initiator))"
+                       download="{{::ctl.getSignFilename(o, ctl.oppositeSide(o.initiator))}}"
+                       href="{{::ctl.getSignLink(o, ctl.oppositeSide(o.initiator))}}"
+                       translate>DOWNLOAD_SIGNATURE</a>
+
+
+                    <a href="#" class="btn btn-small waves-effect waves-light deep-purple darken-2"
+                           ng-show="::o.status=='signed' && o.transfererSignatureDownloaded && o.receiverSignatureDownloaded" role-show="nsd"
+                           ng-click="$event.stopPropagation(); ctl.confirmDownloaded(o);" >
+
+                           <i class="material-icons">check</i>
+                           <span translate>CONFIRM_DOWNLOAD_SIGNATURE</span>
+                    </a>
+
+                </td>
+                <td rowspan="2" ng-if="::o.initiator=='receiver'">   {{::o.reasonFrom.description}} <span ng-if="::o.reasonFrom.document">{{::o.reasonFrom.document}}/{{::o.reasonFrom.created}}</span></td>
+                <td rowspan="2" ng-if="::o.initiator=='transferer'"> {{::o.reasonTo.description}}   <span ng-if="::o.reasonTo.document">{{::o.reasonTo.document}}/{{::o.reasonTo.created}}</span></td>
+
+                <!-- DVP -->
+                <td rowspan="2" class="nowrap gray" ng-if=":: o.type!='dvp'" colspan="4"><i translate>FREE_OF_PAYMENT</i></td>
+                <td class="nowrap" ng-if=":: o.type=='dvp'">
+                    {{::o.receiverRequisites.account}}   / {{::o.receiverRequisites.bic}}
+                </td>
+                <td rowspan="2" class="nowrap" ng-if=":: o.type=='dvp'">{{::o.paymentAmount}} {{::o.paymentCurrency}}</td>
+
+                <td rowspan="2" class="nowrap" ng-if=":: o.type=='dvp' && o.initiator=='transferer'">{{::o.additionalInformation.description}}</td>
+                <td rowspan="2" class="nowrap" ng-if=":: o.type=='dvp' && o.initiator=='receiver'">-</td>
+
+            </tr>
+
+            <tr class="odd-{{::$index % 2}}" ng-if="::(o.status!='initiated' && o.status!='canceled') && (ctl.isAdmin() || !ctl.isInitiator(o))">
+                <td translate>RECEIVER_LABEL</td>
+                <td class="nowrap">
+                    {{::o.deponentTo}}   / {{::o.receiver.account}}   / {{::o.receiver.division}}
+                </td>
+                <td class="nowrap" ng-if=":: o.type=='dvp'">
+                    {{::o.transfererRequisites.account}} / {{::o.transfererRequisites.bic}}
+                </td>
+            </tr>
+
+        </tbody>
+
+
+        <tbody ng-hide="ctl.list.length">
+            <tr>
+                <td colspan="99" align="center">
+                    <i translate>NO_ITEMS_LABEL</i>
+                </td>
+            </tr>
+        </tbody>
+      </table>
+  </div>
+
+
+  <div role-show="nsd">
+    <h2 translate>REDEEM_INSTRUCTIONS_TITLE</h2>
+    <!-- <json-formatter open="1" json="ctl.redeemList" ng-show="ctl.redeemList.length"></json-formatter> -->
+
+    <div class="col s12" ng-repeat="redeem in ctl.redeemList">
+      <h4>{{::redeem.security}}</h4>
+      <table class="table-bordered highlight responsive-table" >
+        <thead>
+            <tr>
+                <th>#</th>
+                <th translate>TRANSFERER_LABEL</th>
+                <th translate>RECEIVER_LABEL</th>
+                <th translate>SECURITY_LABEL</th>
+                <th translate>QUANTITY_LABEL</th>
+                <th translate>REFERENCE_LABEL</th>
+                <th translate>INSTRUCTION_DATE_LABEL</th>
+                <th translate>REASON_LABEL</th>
+            </tr>
+        </thead>
+        <tbody ng-repeat="o in redeem.instructions|orderBy:['-instructionDate', '-reference']">
+            <tr class="odd-{{::$index % 2}}">
+                <th translate>INSTRUCTION_REDEEM_ID</th>
+                <td class="nowrap">{{::o.deponentFrom}} / {{::o.transferer.account}} / {{::o.transferer.division}}</td>
+                <td class="nowrap">{{::o.deponentTo}}   / {{::o.receiver.account}}   / {{::o.receiver.division}}</td>
+                <td>{{::o.security}}</td>
+                <td>{{::o.quantity}}</td>
+                <td>{{::o.reference}}</td>
+                <td>{{::o.instructionDate|date}}</td>
+                <td>
+                  <span>{{::o.reason.description}}</span>
+                  <span ng-if="::o.reason.document">{{::o.reason.document}}/{{::o.reason.created}}</span>
+                </td>
+            </tr>
+        </tbody>
+        <tbody ng-hide="::redeem.instructions.length">
+            <tr>
+                <td colspan="99" align="center">
+                    <i translate>NO_ITEMS_LABEL</i>
+                </td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+
+
+    <div ng-hide="ctl.redeemList.length">
+      <i translate>NO_ITEMS_LABEL</i>
+    </div>
+  </div>
+</div>
+
+
+<!--
+  Create transfer/receive instruction
+  -->
+<div id="transferInstruction" class="modal modal-fixed-footer modal-70">
+  <form name="formInstruction" class="form-horizontal" novalidate>
+    <div class="modal-content">
+        <h4 ng-if="inst.initiator=='transferer' && inst.type!=='dvp'" translate>TRANSFER_INSTRUCTION_160_TITLE</h4>
+        <h4 ng-if="inst.initiator=='receiver'   && inst.type!=='dvp'" translate>RECEIVE_INSTRUCTION_161_TITLE</h4>
+        <h4 ng-if="inst.initiator=='transferer' && inst.type==='dvp'" translate>TRANSFER_INSTRUCTION_162_TITLE</h4>
+        <h4 ng-if="inst.initiator=='receiver'   && inst.type==='dvp'" translate>RECEIVE_INSTRUCTION_163_TITLE</h4>
+
+
+        <div class="row">
+            <div class="input-field col s2">
+                <h5 translate>TRANSFERER_TYPE_LABEL</h5>
+            </div>
+            <div class="input-field col s10">
+                <div class="switch switch-block">
+                    <label>
+                        <span translate>TRANSFERER_TYPE_FOP</span>
+                        <input type="checkbox" name="i_type" ng-model="inst.type" ng-true-value="'dvp'" ng-false-value="'fop'">
+                        <span class="lever"></span>
+                        <span translate>TRANSFERER_TYPE_DVP</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- INSTRUCTION REQUISITES -->
+        <div class="row">
+            <!-- transferer/From -->
+            <instruction-requisite model="inst.transferer" deponent-lock="inst.initiator=='transferer'" label="TRANSFERER_LABEL"></instruction-requisite>
+            <!-- receiver/To -->
+            <instruction-requisite model="inst.receiver" deponent-lock="inst.initiator=='receiver'" label="RECEIVER_LABEL"></instruction-requisite>
+        </div>
+        <div class="row">
+          <div class="input-field col s6">
+            <input name="i_security" type="text" class="uppercase" ng-model="inst.security" required ng-length="12" ng-pattern="/^[\w\d]*$/">
+            <label for="i_security" translate>SECURITY_LABEL</label>
+            <span class="input-error-message" ng-show="formInstruction.i_security.$error.pattern" translate>ONLY_CHAR_DIGIT_LABEL</span>
+            <span class="input-error-message" ng-show="!formInstruction.i_security.$error.pattern && formInstruction.i_security.$error.length" translate>12_CHARACTERS_LABEL</span>
+          </div>
+          <div class="input-field col s6">
+            <input name="i_quantity" type="number" min="0" class="" ng-model="inst.quantity" required>
+            <label for="i_quantity" translate>QUANTITY_LABEL</label>
+          </div>
+        </div>
+
+        <div class="row">
+            <h5 class="col s12" translate>INSTRUCTION_DETAILS</h5>
+        </div>
+        <div class="row">
+          <div class="input-field col s6">
+            <input name="i_reference" type="text" class="uppercase" ng-model="inst.reference" ng-maxlength="16" ng-pattern="/^[\w\d]*$/" required>
+            <label for="i_reference" translate>REFERENCE_LABEL</label>
+            <span class="input-error-message" ng-show="formInstruction.i_reference.$error.pattern" translate>ONLY_CHAR_DIGIT_LABEL</span>
+            <span class="input-error-message" ng-show="!formInstruction.i_reference.$error.pattern && formInstruction.i_reference.$error.maxlength" translate>MAX_16_CHARACTERS_LABEL</span>
+          </div>
+          <div class="input-field col s6">
+            <input name="i_miid" id="i_miid" type="text" class="" ng-model="inst.memberInstructionId" ng-maxlength="16" ng-pattern="/^[\w\d ]*$/" required>
+            <label for="i_miid" translate>INSTRUCTION_ID_LABEL</label>
+            <span class="input-error-message" ng-show="formInstruction.i_miid.$error.pattern" translate>ONLY_CHAR_DIGIT_SPACE_LABEL</span>
+            <span class="input-error-message" ng-show="!formInstruction.i_miid.$error.pattern && formInstruction.i_miid.$error.maxlength" translate>MAX_16_CHARACTERS_LABEL</span>
+          </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s6">
+                <i class="material-icons postfix">schedule</i>
+                <input name="i_trade_date" type="text" class="datepicker" ng-model="inst.tradeDate" input-date required>
+                <label for="i_trade_date" translate>TRADE_DATE_LABEL</label>
+            </div>
+
+            <div class="input-field col s6">
+                <i class="material-icons postfix">schedule</i>
+                <input name="i_instruction_date" type="text" class="datepicker" ng-model="inst.instructionDate" input-date required>
+                <label for="i_instruction_date" translate>INSTRUCTION_DATE_LABEL</label>
+            </div>
+        </div>
+
+
+        <!-- DVP options -->
+        <div ng-if="inst.type=='dvp'">
+            <div class="row">
+                <h5 class="col s12" translate>PAYMENT_LABEL</h5>
+            </div>
+
+            <!-- HERE: we have swapped transferer and receiver -->
+            <div class="row">
+                <instruction-payment model="inst.receiverRequisites" deponent="inst.initiator=='receiver' ? inst.receiver.deponent : null" label="PAYMENT_SENDER"></instruction-payment>
+            </div>
+            <div class="row">
+                <instruction-payment model="inst.transfererRequisites" deponent="inst.initiator=='transferer' ? inst.transferer.deponent : null" label="PAYMENT_RECEIVER"></instruction-payment>
+            </div>
+
+            <div class="row">
+                <h5 class="col s2" translate>PAYMENT</h5>
+
+                <div class="input-field col s5">
+                    <input name="i_pay_sum" id="i_pay_sum"
+                           type="number" class="uppercase" ng-model="inst.paymentAmount" required>
+                    <label for="i_pay_sum" translate>PAYMENT_AMOUNT_LABEL</label>
+                    <span class="input-error-message" ng-show="formInstruction.i_pay_sum.$error.length" translate>20_CHARACTERS_LABEL</span>
+                </div>
+                <div class="input-field col s1">
+                    <input type="text" class="uppercase" value="RUB" disabled style="color: black;">
+                    <label translate class="active">PAYMENT_CURRENCY</label>
+                </div>
+            </div>
+
+            <div class="row" ng-if="inst.initiator=='receiver'">
+                <div class="row">
+                    <div class="input-field col s12">
+                        <textarea name="i_add_info" class="materialize-textarea" ng-model="inst.additionalInformation.description" required></textarea>
+                        <label for="i_add_info" translate>DESCRIPTION_EXTRA_LABEL</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- REASON -->
+        <div class="row">
+            <h5 class="col s12" translate>REASON_LABEL</h5>
+        </div>
+        <div class="row">
+          <div class="input-field col s12">
+            <textarea name="i_a_description" class="materialize-textarea" ng-model="inst.reason.description"></textarea>
+            <label for="i_a_description" translate>DESCRIPTION_LABEL</label>
+          </div>
+        </div>
+        <div class="row" ng-if="inst.type!='dvp'">
+          <div class="input-field col s8">
+            <input name="i_a_document" type="text" class="" ng-model="inst.reason.document">
+            <label for="i_a_document" translate>DOCUMENT_NUMBER_LABEL</label>
+          </div>
+          <div class="input-field col s4">
+            <i class="material-icons postfix" translate>schedule</i>
+            <input name="i_a_created" type="text" class="datepicker" ng-model="inst.reason.created" input-date>
+            <label for="i_a_created" translate>DOCUMENT_DATE_LABEL</label>
+          </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+
+      <!-- Dropdown Trigger -->
+      <div class="inline-block" ng-if="ctl.test && inst.initiator == 'receiver'">
+          <span class='btn btn-flat yellow dropdown-trigger' alignment="top" dropdown data-target='dropdown9' data-activates='dropdown9'>prefill from</span>
+
+          <!-- Dropdown Structure -->
+          <ul id='dropdown9' class='dropdown-content' ng-class="{'translate100y':ctl.getOrgs().length <=3}" alignment="top" >
+            <li ng-repeat="o in ctl.getOrgs()">
+                <a href="#!" ng-click="ctl.setPrefill(inst.initiator, o, null)">{{::o}}</a>
+            </li>
+          </ul>
+      </div>
+      <!-- Dropdown Trigger -->
+      <div class="inline-block" ng-if="ctl.test && inst.initiator == 'transferer'">
+          <span class='btn btn-flat yellow dropdown-trigger' alignment="top" dropdown data-target='dropdown10' data-activates='dropdown10'>prefill to</span>
+
+          <!-- Dropdown Structure -->
+          <ul id='dropdown10' class='dropdown-content' ng-class="{'translate100y':ctl.getOrgs().length <=3}" alignment="top" >
+            <li ng-repeat="o in ctl.getOrgs()">
+                <a href="#!" ng-click="ctl.setPrefill(inst.initiator, null, o)">{{::o}}</a>
+            </li>
+          </ul>
+      </div>
+
+
+      <input type="submit" class="modal-action modal-close waves-effect waves-green btn-flat"
+             ng-click="ctl.sendInstruction(inst)"
+             ng-disabled="formInstruction.$invalid"
+             value="OK_LABEL" translate-attr="{value:'OK_LABEL'}"/>
+      <input type="button" class="modal-action modal-close waves-effect waves-red btn-flat"
+            ng-click="inst = null" value="CANCEL_LABEL" translate-attr="{value:'CANCEL_LABEL'}"/>
+    </div>
+  </form>
+</div>
+
+
+<!--
+  Redemption
+-->
+<div id="redemption" class="modal modal-fixed-footer">
+  <form name="formRedemption" class="form-horizontal" novalidate>
+    <div class="modal-content">
+      <h4 translate>CREATE_REDEMPTION_INSTRUCTION_LABEL</h4>
+
+
+      <div class="row">
+        <div class="input-field col s12">
+          <input name="r_security" type="text" class="uppercase" ng-model="redemption.security" required ng-length="12" ng-pattern="/^[\w\d]*$/">
+          <label for="r_security" translate>SECURITY_LABEL</label>
+          <span class="input-error-message" ng-show="formRedemption.r_security.$error.pattern" translate>ONLY_CHAR_DIGIT_LABEL</span>
+          <span class="input-error-message" ng-show="!formRedemption.r_security.$error.pattern && formRedemption.r_security.$error.length" translate>12_CHARACTERS_LABEL</span>
+        </div>
+      </div>
+
+<!--
+      <div class="row" hidden>
+        <div class="input-field col s12">
+          <input name="r_reference" type="text" class="" ng-model="inst.instructionNum">
+          <label for="r_reference" translate>INSTRUCTION_ID_LABEL</label>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="input-field col s12">
+          <input name="r_reference" type="text" class="" ng-model="redemption.reference" required>
+          <label for="r_reference">Reference</label>
+        </div>
+      </div>
+-->
+      <div class="row">
+          <h5 class="col s12" translate>REASON_LABEL</h5>
+      </div>
+      <div class="row">
+        <div class="input-field col s12">
+          <textarea name="r_a_description" class="materialize-textarea" ng-model="redemption.reason.description"></textarea>
+          <label for="r_a_description" translate>DESCRIPTION_LABEL</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s8">
+          <input name="r_a_document" type="text" class="" ng-model="redemption.reason.document">
+          <label for="r_a_document" translate>DOCUMENT_NUMBER_LABEL</label>
+        </div>
+        <div class="input-field col s4">
+          <i class="material-icons prefix">schedule</i>
+          <input name="r_a_created" type="text" class="datepicker" ng-model="redemption.reason.created" input-date>
+          <label for="r_a_created" translate>DOCUMENT_DATE_LABEL</label>
+        </div>
+      </div>
+
+     </div>
+    <div class="modal-footer">
+      <input type="submit"
+            class="modal-action modal-close waves-effect waves-green btn-flat red white-text"
+            ng-disabled="formRedemption.$invalid"
+            ng-click="ctl.sendRedemption(redemption)" value="OK_LABEL" translate-attr="{value:'OK_LABEL'}"/>
+
+      <input type="button" class="modal-action modal-close waves-effect waves-red btn-flat"
+            ng-click="inst = null" value="CANCEL_LABEL" translate-attr="{value:'CANCEL_LABEL'}"/>
+    </div>
+  </form>
+</div>
+
+
+<!-- INSTRUCTION HISTORY  -->
+<script type="text/ng-template" id="balance-history.html">
+  <div class="modal modal-large modal-fixed-footer">
+    <form name="form" class="form-horizontal" novalidate>
+      <div class="modal-content">
+
+          <h4 translate>INSTRUCTION_HISTORY_TITLE</h4>
+          <table class="table-bordered highlight responsive-table">
+          <thead>
+              <tr>
+                  <th translate>CREATED_LABEL</th>
+                  <th translate>TRANSFERER_LABEL</th>
+                  <th translate>RECEIVER_LABEL</th>
+                  <th translate>SECURITY_LABEL</th>
+                  <th translate>QUANTITY_LABEL</th>
+                  <th translate>REFERENCE_LABEL</th>
+                  <th translate>INSTRUCTION_DATE_LABEL</th>
+                  <th translate>TRADE_DATE_LABEL</th>
+                  <th translate>STATUS_LABEL</th>
+                  <th translate>REASON_LABEL</th>
+              </tr>
+          </thead>
+          <tbody>
+              <tr ng-repeat="o in $options.history|orderBy:['-_created']" >
+                  <td class="grey-text nowrap">{{::o._created|date:'M/d/yy H:mm:ss'}}</td>
+                  <td class="nowrap">{{::o.deponentFrom}} / {{::o.transferer.account}} / {{::o.transferer.division}}</td>
+                  <td class="nowrap">{{::o.deponentTo}}   / {{::o.receiver.account}}   / {{::o.receiver.division}}</td>
+                  <td>{{::o.security}}</td>
+                  <td>{{::o.quantity}}</td>
+                  <td>{{::o.reference}}</td>
+                  <td>{{::o.instructionDate|date}}</td>
+                  <td>{{::o.tradeDate|date}}</td>
+                  <td class="center">
+                    <div class="{{::$options.getStatusClass(o.status)}}">{{::'STATUS_'+o.status|translate}}</div>
+                  </td>
+                  <td>
+                      <span ng-if="$options.showReason(o, 'deponentFrom')">{{::o.reasonFrom.description}} <span ng-if="::o.reasonFrom.document">{{::o.reasonFrom.document}}/{{::o.reasonFrom.created}}</span></span>
+                      <br/>
+                      <span ng-if="$options.showReason(o, 'deponentTo')">{{::o.reasonTo.description}} <span ng-if="::o.reasonTo.document">{{::o.reasonTo.document}}/{{::o.reasonTo.created}}</span></span>
+                  </td>
+              </tr>
+
+          </tbody>
+
+          <tbody ng-hide="$options.history.length">
+              <tr>
+                  <td colspan="99" align="center">
+                      <i translate>NO_ITEMS_LABEL</i>
+                  </td>
+              </tr>
+          </tbody>
+        </table>
+
+      </div>
+      <div class="modal-footer">
+        <a href="#!" class="modal-action modal-close waves-effect btn-flat" ng-click="$close()" translate>CLOSE_LABEL</a>
+      </div>
+    </form>
+  </div>
+
+</script>
+
+
+
+
+<!-- UPLOAD SIGNATURE -->
+<script type="text/ng-template" id="upload-signature.html">
+
+
+    <div id="uploadSignature" class="modal modal-tiny">
+        <div class="modal-content">
+
+            <h4 translate>UPLOAD_SIGNATURE_TITLE</h4>
+            <div class="select-box drop-box"
+            ngf-select ngf-drop ngf-drop-available="dropSupported"
+            ngf-change="$options.ctl.uploadSignature($file, $close)">
+
+                <span><u>Select</u> file</span>
+                <span ng-show="dropSupported" class=""> or Drop File</span>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <a href="#!" class="modal-action modal-close waves-effect btn-flat" ng-click="$close()" translate>CLOSE_LABEL</a>
+        </div>
+    </div>
+</script>
+

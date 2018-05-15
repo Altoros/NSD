@@ -1,0 +1,344 @@
+
+.inline-block{
+  display: inline-block;
+  position: relative;
+}
+
+.error{
+  color: #F44336;
+}
+
+.loading {
+  font-size: 30vmin;
+  text-align: center;
+}
+
+.top-nav {
+  margin-left: 0;
+}
+
+.nav-wrapper {
+  line-height: 64px;
+  padding: 0 30px;
+}
+
+.nav-wrapper .logo {
+  line-height: initial;
+}
+
+.nav-wrapper .logo img {
+  margin-top: 8px;
+  height: 50px;
+  vertical-align: top;
+}
+
+.nav-wrapper .menu {
+  display: inline-block;
+}
+
+.nav-wrapper .title {
+  font-size: xx-large;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.foot3 .f-cont {
+  margin: 0;
+  padding: 0;
+}
+
+html body .wrapper main {
+  padding-bottom: 152px;
+  margin-bottom: -152px;
+}
+
+.container {
+  padding: 2% 0;
+}
+
+.border{
+  border: solid 1px rgba(51,51,51,0.12);
+}
+
+/* fix header */
+h3{
+  margin-top: 0;
+  padding-top: 1.46rem;
+}
+
+@media screen and (max-width: 1024px) {
+  .nav-wrapper .logo {
+    float: right;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  html body .wrapper main {
+    padding-bottom: 145px;
+    margin-bottom: -145px;
+  }
+
+  .endpoint {
+    word-break: break-all;
+    text-align: left;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  html body .wrapper main {
+    padding-bottom: 137px;
+    margin-bottom: -137px;
+  }
+
+  .nav-wrapper .logo img {
+    height: 40px;
+  }
+}
+
+.wrapper.vertical-sidebar .side-nav li.active, .wrapper.vertical-sidebar .side-nav li .menu-active {
+  background-color: #d6d6d6;
+}
+
+.header-right {
+  max-width: 400px;
+}
+
+html body.horizontal-navigation .wrapper.vertical-sidebar .dropdown-content {
+    min-width: 200px !important;
+}
+
+nav .menu-active {
+  font-weight: bold;
+  background-color: rgba(0,0,0,0.1);
+}
+
+[ng-click] {
+  cursor: pointer;
+}
+
+td, th, .clock, .endpoint {
+  font-size: large;
+}
+
+.transparent{
+  opacity: 0;
+}
+
+div[data-error]{
+  position: relative;
+
+  transition: .2s opacity ease-out, .2s color ease-out;
+}
+div[data-error]:after{
+  content: attr(data-error);
+  color: #F44336;
+  font-size: 12px;
+
+  display: block;
+  position: absolute;
+  bottom: 0px;
+  left: 0;
+}
+
+input.locked:disabled{
+  color: inherit;
+}
+
+.material-icons.postfix{
+    position: absolute;
+    right: 0;
+    margin-right: 15px;
+    color: rgba(0,0,0,0.26);
+}
+.nowrap{
+  white-space: nowrap;
+}
+
+.modal.modal-dialog {
+  height: initial;
+  min-height: 250px;
+}
+
+.modal.modal-dialog.modal-prompt{
+  min-height: 300px;
+}
+
+.modal.modal-70{
+  width: 70%;
+}
+
+.modal.modal-90,
+.modal.modal-large{
+  width: 90%;
+}
+
+
+.odd-0{
+  background-color: #f2f2f2;
+}
+
+
+.btn {
+  white-space: nowrap;
+}
+
+.modal .modal-footer .btn.btn-flat {
+    margin: 6px 0
+}
+
+.btn-group-vertical .btn+.btn {
+  margin-top: 4px;
+}
+
+.btn-group-vertical .btn {
+  display: block;
+  width: 100%;
+}
+
+/*
+.ng-invalid{ outline: 1px solid red !important; }
+.ng-valid{ outline: 1px solid green !important; }
+*/
+
+input.ng-dirty.ng-valid,
+select.ng-dirty.ng-valid,
+textarea.ng-dirty.ng-valid,
+.select-wrapper.ng-dirty.ng-valid input.select-dropdown{
+    box-shadow: 0 1px 0 0 #26a69a;
+    border-bottom: 1px solid #26a69a;
+}
+
+input.ng-dirty.ng-invalid,
+select.ng-dirty.ng-invalid,
+textarea.ng-dirty.ng-invalid,
+.select-wrapper.ng-dirty.ng-invalid input.select-dropdown{
+    box-shadow: 0 1px 0 0 #F44336;
+    border-bottom: 1px solid #F44336;
+}
+
+input.ng-invalid + label:after,
+select.ng-invalid + label:after,
+textarea.ng-invalid + label:after,
+.select-wrapper.ng-invalid + label:after{
+  content: attr(data-error);
+  color: #F44336;
+
+  position: absolute;
+  top: 65px;
+  left: 0px;
+  opacity: 0;
+  transition: .2s opacity ease-out, .2s color ease-out, .2s top ease-out;
+  font-size: 0.9rem;
+  text-transform: lowercase;
+}
+
+.input-error-message{
+  color: #F44336;
+  transition: .2s opacity ease-out, .2s color ease-out, .2s top ease-out;
+  font-size: 0.9rem;
+  text-transform: lowercase;
+
+  top: -5px;
+  height: 0;
+  display: block;
+  position: relative;
+  line-height: 0;
+}
+
+.input-field .prefix ~ .input-error-message{
+  margin-left: 3rem;
+}
+
+input.ng-dirty.ng-invalid + label:after,
+select.ng-dirty.ng-invalid + label:after,
+textarea.ng-dirty.ng-invalid + label:after,
+.select-wrapper.ng-dirty.ng-invalid + label:after{
+  opacity: 1;
+}
+
+
+
+input.ng-invalid-required + label:before,
+select.ng-invalid-required + label:before,
+textarea.ng-invalid-required + label:before,
+.select-wrapper.ng-invalid-required + label:before,
+
+input.ng-valid-required + label:before,
+select.ng-valid-required + label:before,
+textarea.ng-valid-required + label:before,
+.select-wrapper.ng-valid-required + label:before{
+  content: '* ';
+  color: #F44336;
+  font-size: 0.9rem;
+}
+
+
+/* special style for 'required' */
+input.ng-dirty.ng-invalid-required:not(:focus) + label:after,
+select.ng-dirty.ng-invalid-required:not(:focus) + label:after,
+textarea.ng-dirty.ng-invalid-required:not(:focus) + label:after,
+.select-wrapper.ng-dirty.ng-invalid-required + label:after{
+  content: 'Required';
+  top: 32px;
+  opacity: 1;
+}
+
+.select-wrapper.ng-dirty.ng-invalid-required + label:after{
+  top: 65px;
+}
+
+.uppercase{
+  text-transform: uppercase;
+}
+
+
+.switch-block{
+  height: 38px;
+}
+
+
+/* compaction fix */
+html {
+  font-size: 12px;
+}
+.row{
+  margin-bottom: 5px;
+}
+h2{
+  font-size: 3rem;
+}
+td, th, .clock, .endpoint {
+  font-size: small;
+}
+td, th{
+  padding: 5px 3px;
+}
+
+.gray{
+  color: gray;
+}
+
+.btn i {
+    font-size: 1.0rem;
+}
+
+
+/* hotfix for dropdown */
+.translate100y{
+  transform: translate(0, -110px);
+}
+
+
+.select-box{
+  cursor: pointer;
+  font-size: 16pt;
+  color: #666;
+}
+.drop-box{
+    background: #F8F8F8;
+    border: 5px dashed #DDD;
+    min-width: 170px;
+    text-align: center;
+    padding: 50px 10px;
+    margin-left: 10px;
+}

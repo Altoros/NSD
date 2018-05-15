@@ -1,0 +1,46 @@
+[
+  {
+    "organization": "sberbank.nsd.ru",
+    "deponent": "AA1000000000",
+    "balances": [
+      {
+        "account": "XXX000000000",
+        "division": "00000000000000011"
+      },
+      {
+        "account": "XXX000000000",
+        "division": "00000000000000022"
+      },
+      {
+        "account": "XXX000000000",
+        "division": "00000000000000033"
+      },
+      {
+        "account": "90000000000000000011",
+        "division": "111111111"
+      }
+    ]
+  },
+  {
+    "organization": "mts.nsd.ru",
+    "deponent": "BB2000000000",
+    "balances": [
+      {
+        "account": "YYY000000000",
+        "division": "00000000000000011"
+      },
+      {
+        "account": "YYY000000000",
+        "division": "00000000000000022"
+      },
+      {
+        "account": "YYY000000000",
+        "division": "00000000000000033"
+      },
+      {
+        "account": "90000000000000000022",
+        "division": "222222222"
+      }
+    ]
+  }
+]

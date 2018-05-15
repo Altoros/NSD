@@ -1,0 +1,4 @@
+[submodule "fabric-starter"]
+	path = fabric-starter
+	url = https://github.com/olegabu/fabric-starter.git
+	branch = 2018_03-MAIN_ORG_DEPLOYMENT

@@ -1,0 +1,250 @@
+<div class="progress" ng-show="ctl.invokeInProgress">
+    <div class="indeterminate"></div>
+</div>
+
+
+
+<div class="row" role-show="nsd">
+  <div class="col s12">
+    <div>
+      <button class="btn btn-primary" type="button" ng-click="securityForm.$setPristine(); ctl.newSecurityItem();" modal href="#newSecurityEntry">
+        <span translate>NEW_SECURITY_LABEL</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<div class="row">
+  <div class="col s12">
+    <table class="table-bordered highlight responsive-table">
+      <thead>
+          <tr>
+              <th translate>SECURITY_LABEL</th>
+              <th translate>STATUS_LABEL</th>
+              <th translate>EVENTS_LABEL</th>
+              <th width="20%"  role-show="nsd"></th>
+          </tr>
+      </thead>
+      <tbody>
+          <tr ng-repeat="o in ctl.list">
+              <td>{{::o.security}}</td>
+              <td>{{::'STATUS_'+o.status|translate}}</td>
+              <td>
+                <ul ng-if="::o.entries.length">
+                  <li ng-repeat="e in o.entries|orderBy:'-date'">
+                    <b>{{::e.code}}</b> <span translate>TIME_AT</span> <span>{{::e.date|date}}</span> {{::e.reference}}
+                    <br/>
+                    <i>{{::e.text}}</i>
+
+                    <div>&nbsp;</div>
+                  </li>
+                </ul>
+                <i ng-if="::!o.entries.length" translate>NO_ITEMS_LABEL</i>
+              </td>
+              <td role-show="nsd">
+                  <button class="btn btn-primary" type="button" ng-click="ctl.newCalendarEntry(o); calendarEntryForm.$setPristine();"
+                          href="#newCalendarEntry" modal>
+                    <span translate>NEW_CALENDAR_ENTRY_LABEL</span>
+                  </button>
+                  <!--
+                  <input type="button" class="btn btn-default" ng-click="ctl.verify(o)" value="Verify" ng-hide="o.status"/>
+                  <input type="button" class="btn btn-danger" ng-click="ctl.decline(o)" value="Decline" ng-show="o.status"/>
+                  -->
+              </td>
+          </tr>
+
+          <tr ng-hide="ctl.list.length">
+              <td colspan="99" align="center">
+                  <i translate>NO_ITEMS_LABEL</i>
+              </td>
+          </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+
+<!-- Modal Structure -->
+<div id="newCalendarEntry" class="modal modal-fixed-footer">
+  <form name="calendarEntryForm" class="form-horizontal" novalidate>
+    <div class="modal-content">
+      <h4 translate>CALENDAR_ENTRY_TITLE</h4>
+
+        <!--
+        <div class="row" hidden>
+          <div class="input-field col s12">
+            <p>
+              <input class="with-gap" name="ce_type" value="coupon" type="radio" ng-model="centry.type" id="ce_coupon"/>
+              <label for="ce_coupon" translate>COUPON_LABEL</label>
+            </p>
+            <p>
+              <input class="with-gap" name="ce_type" value="maturity" type="radio" ng-model="centry.type" id="ce_maturity" />
+              <label for="ce_maturity" translate>MATURITY_LABEL</label>
+            </p>
+            <p>
+              <input class="with-gap" name="ce_type" value="redemption" type="radio" ng-model="centry.type" id="ce_redemption"  />
+              <label for="ce_redemption" translate>REDEMPTION_LABEL</label>
+            </p>
+            <label translate>EVENT_TYPE_LABEL</label>
+          </div>
+        </div>
+        -->
+        <div class="row">
+          <div class="input-field col s12">
+            <input name="ce_type" type="text" class="" ng-model="centry.type" required>
+            <label for="ce_type" translate>EVENT_TYPE_LABEL</label>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="input-field col s12">
+            <i class="material-icons postfix">schedule</i>
+            <input name="ce_date" type="text" class="datepicker" ng-model="centry.date" input-date required>
+            <label for="ce_date" translate>CALENDAR_ENTRY_DATE_LABEL</label>
+          </div>
+        </div>
+
+        <div class="row" hidden>
+          <div class="input-field col s12">
+            <input name="ce_security" type="text" class="" ng-model="centry.security">
+            <label for="ce_security" translate>SECURITY_LABEL</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s12">
+            <input name="ce_reference" type="text" class="" ng-model="centry.reference" required ng-maxlength="16">
+            <label for="ce_reference" translate>REFERENCE_LABEL</label>
+            <span class="input-error-message" ng-show="calendarEntryForm.ce_reference.$error.maxlength" translate>MAX_16_CHARACTERS_LABEL</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s12">
+            <textarea id="ce_description" name="ce_description" class="materialize-textarea" ng-model="centry.description"></textarea>
+            <label for="ce_description" translate>DESCRIPTION_LABEL</label>
+          </div>
+        </div>
+
+    </div>
+    <div class="modal-footer">
+
+      <input type="submit"
+            class="modal-action modal-close waves-effect waves-green btn-flat red white-text"
+            ng-disabled="calendarEntryForm.$invalid"
+            ng-click="ctl.sendCEntry(centry)" value="OK_LABEL" translate-attr="{value:'OK_LABEL'}"/>
+
+      <input type="button" class="modal-action modal-close waves-effect waves-red btn-flat"
+            ng-click="centry = null" value="CANCEL_LABEL" translate-attr="{value:'CANCEL_LABEL'}"/>
+    </div>
+  </form>
+</div>
+
+
+
+
+
+
+
+
+
+<!-- Modal Structure -->
+<div id="newSecurityEntry" class="modal modal-fixed-footer">
+  <form name="securityForm" class="form-horizontal" novalidate>
+    <div class="modal-content">
+      <h4 translate>NEW_SECURITY_TITLE</h4>
+
+        <div class="row">
+          <div class="input-field col s12">
+            <input name="s_security" type="text" class="uppercase" ng-model="security.security" required ng-length="12" ng-pattern="/^[\w\d]*$/">
+            <label for="s_security" translate>SECURITY_LABEL</label>
+            <span class="input-error-message" ng-show="securityForm.s_security.$error.pattern" translate>ONLY_CHAR_DIGIT_LABEL</span>
+            <span class="input-error-message" ng-show="!securityForm.s_security.$error.pattern && securityForm.s_security.$error.length" translate>12_CHARACTERS_LABEL</span>
+          </div>
+        </div>
+        <div class="row" hidden>
+          <div class="input-field col s12">
+            <textarea id="s_description" name="s_description" class="materialize-textarea" ng-model="security.description"></textarea>
+            <label for="s_description" translate>DESCRIPTION_LABEL</label>
+          </div>
+        </div>
+
+
+        <!--
+        <div class="row">
+          <div class="input-field col s2">
+            <h5>Initiator</h5>
+          </div>
+          <div class="input-field col s5">
+            <select ng-model="security.initiator.account" name="s_t_acc" material-select watch class=""
+                    ng-options="n as n+' ('+o.org+')' for (n, o) in ctl.accounts" placeholder="Account"> </select>
+            <label for="s_t_acc">Account</label>
+          </div>
+          <div class="input-field col s5">
+            <input name="s_t_acc" type="text" class="uppercase" ng-model="security.initiator.account" ng-length="12">
+            <label for="s_t_acc">Account</label>
+            <span class="input-error-message" ng-show="formInstruction.s_t_acc.$error.length">Should be exactly 12 characters</span>
+          </div>
+
+          <div class="input-field col s5">
+            <select ng-model="security.initiator.division" name="s_t_div" material-select watch class=""
+                    ng-options="o for o in ctl.accounts[security.initiator.account]" placeholder="Division"> </select>
+            <label for="s_t_div">Division</label>
+          </div>
+          <div class="input-field col s5">
+            <input name="s_t_div" type="text" class="uppercase" ng-model="security.initiator.division" ng-length="17">
+            <label for="s_t_div">Division</label>
+            <span class="input-error-message" ng-show="formInstruction.s_t_div.$error.length">Should be exactly 17 characters</span>
+          </div>
+        </div>
+        -->
+
+
+        <div class="row">
+          <!-- redeem org -->
+          <div class="input-field col s12">
+            <h5 class="nowrap" translate>SECURITY_REDEEM_TO_LABEL</h5>
+          </div>
+        </div>
+        <div class="row">
+          <div class="input-field col s6">
+            <select ng-model="security.redeem.account" name="s_r_acc" material-select watch
+                    ng-options="n as n+' ('+o.org+')' for (n, o) in ctl.accounts" required></select>
+            <label for="s_r_acc" translate>ACCOUNT_LABEL</label>
+          </div>
+          <!--
+          <div class="input-field col s5">
+            <input name="s_r_acc" type="text" class="uppercase" ng-model="security.redeem.account" required ng-length="12">
+            <label for="s_r_acc">Account</label>
+            <span class="input-error-message" ng-show="formInstruction.s_r_acc.$error.length">Should be exactly 12 characters</span>
+          </div>
+          -->
+
+          <div class="input-field col s6">
+            <select ng-model="security.redeem.division" name="s_r_div" material-select watch
+                    ng-options="o for o in ctl.accounts[security.redeem.account]" required></select>
+            <label for="s_r_div" translate>DIVISION_LABEL</label>
+          </div>
+
+          <!--
+          <div class="input-field col s5">
+            <input name="s_r_div" type="text" class="uppercase" ng-model="security.redeem.division" required ng-length="17">
+            <label for="s_r_div">Division</label>
+            <span class="input-error-message" ng-show="formInstruction.s_r_div.$error.length">Should be exactly 17 characters</span>
+          </div>
+          -->
+        </div>
+
+    </div>
+    <div class="modal-footer">
+
+      <input type="submit"
+            class="modal-action modal-close waves-effect waves-green btn-flat"
+            ng-disabled="securityForm.$invalid"
+            ng-click="ctl.sendSecurity(security)" value="OK_LABEL" translate-attr="{value:'OK_LABEL'}"/>
+
+      <input type="button" class="modal-action modal-close waves-effect waves-red btn-flat"
+            ng-click="security = null; securityForm.$setPristine();" value="CANCEL_LABEL" translate-attr="{value:'CANCEL_LABEL'}"/>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,20 @@
+export DOMAIN=nsd.ru
+export MAIN_ORG=nsd
+
+export ORG1=nsd
+export ORG2=sberbank
+export ORG3=mts
+
+export IP1=XX.XX.XX.XX
+export IP2=YY.YY.YY.YY
+export IP3=ZZ.ZZ.ZZ.ZZ
+
+
+: ${FABRIC_STARTER_HOME:=../fabric-starter}
+export FABRIC_STARTER_HOME
+export PATH=$FABRIC_STARTER_HOME/:$PATH
+
+
+echo -e "Set environment for blockchain deployment:\nFABRIC_STARTER_HOME:$FABRIC_STARTER_HOME\nMain org:$MAIN_ORG"
+
+#export AUTOSIGN=1 #debug mode
